@@ -26,7 +26,6 @@ import UserPage from "views/User.js";
 import UpgradeToPro from "views/Upgrade.js";
 import Prueba from "views/Prueba.js"
 import PruebaRecharts from "views/PruebaRecharts.js";
-import Nivo1 from "views/Nivo1.js";
 import Nivo2 from "views/Nivo2.js";
 
 var routes = [
@@ -50,13 +49,6 @@ var routes = [
     name: "Prueba",
     icon: "nc-icon nc-bank",
     component: Prueba,
-    layout: "/admin",
-  },
-  {
-    path: "/nivo1",
-    name: "Nivo1",
-    icon: "nc-icon nc-bank",
-    component: Nivo1,
     layout: "/admin",
   },
   {
@@ -109,7 +101,6 @@ var routes = [
     layout: "/admin",
   },
   {
-    pro: true,
     path: "/upgrade",
     name: "Upgrade to PRO",
     icon: "nc-icon nc-spaceship",

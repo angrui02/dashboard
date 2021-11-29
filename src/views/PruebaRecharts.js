@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { csv } from 'd3';
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadialBarChart, RadialBar } from 'recharts';
 
 import {
     Card,
@@ -11,92 +11,55 @@ import {
     Row,
     Col,
 } from "reactstrap";
+import Footer from "components/Footer/Footer";
 
 const csvUrl =
     'https://raw.githubusercontent.com/lopezbec/COVID19_Tweets_Dataset/main/Summary_Sentiment_ES/Sent_by_month.csv';
 
-const data_aux = [
-    {
-        name: 'Page A',
-        uv: 4000,
-        pv: 2400,
-        amt: 2400,
-    },
-    {
-        name: 'Page B',
-        uv: 3000,
-        pv: 1398,
-        amt: 2210,
-    },
-    {
-        name: 'Page C',
-        uv: 2000,
-        pv: 9800,
-        amt: 2290,
-    },
-    {
-        name: 'Page D',
-        uv: 2780,
-        pv: 3908,
-        amt: 2000,
-    },
-    {
-        name: 'Page E',
-        uv: 1890,
-        pv: 4800,
-        amt: 2181,
-    },
-    {
-        name: 'Page F',
-        uv: 2390,
-        pv: 3800,
-        amt: 2500,
-    },
-    {
-        name: 'Page G',
-        uv: 3490,
-        pv: 4300,
-        amt: 2100,
-    },
-];
+
 
 const formatData = oldData => {
     if (oldData == null)
         return null;
     let labels = [...new Set(oldData.map(item => item.Month + "/" + item.Year))];
     let negative = oldData.filter(item => item.Sentiment === 'negative').map(item => item.Count);
+    let totaln = 0;
+    for (let i of negative) totaln += parseInt(i);
+
     let positive = oldData.filter(item => item.Sentiment === 'positive').map(item => item.Count);
+    let totalp = 0;
+    for (let i of positive) totalp += parseInt(i);
     let neutral = oldData.filter(item => item.Sentiment === 'neutral').map(item => item.Count);
+    let totalN = 0;
+    for (let i of neutral) totalN += parseInt(i);
+    let total = totalp + totaln + totalN;
+    totaln = Math.floor(totaln * 100 / total);
+    totalp = Math.floor(totalp * 100 / total);
+    totalN = Math.floor(totalN * 100 / total);
+
 
     return {
-        labels: labels,
         datasets: [
             {
-                label: 'positive',
-                data: positive,
-                backgroundColor: 'rgb(0, 255, 0)',
-                borderColor: 'green',
-                tension: 0.1
+                "name": "positive",
+                "datos": totalp,
+                "fill": "#8884d8"
             },
             {
-                //type: 'bar',
-                label: 'negative',
-                data: negative,
-                backgroundColor: 'rgb(255, 0, 0)',
-                borderColor: 'red',
-                tension: 0.1
+                "name": "negative",
+                "datos": totaln,
+                "fill": "#83a6ed"
             },
             {
-                label: 'neutral',
-                data: neutral,
-                backgroundColor: 'rgb(0, 0, 255)',
-                borderColor: 'blue',
-                tension: 0.1
+                "name": "neutral",
+                "datos": totalN,
+                "fill": "#82ca9d"
             }
         ]
     }
 
 }
+
 
 function PruebaRecharts() {
     const [data, setData] = useState([]);
@@ -106,39 +69,85 @@ function PruebaRecharts() {
     }, []);
 
     const newData = formatData(data);
+    const datos_vector = newData.datasets;
+
     return (
         <>
 
             <div className="content">
                 <Row>
-                    <Col md="12">
+                    <Col md="6">
                         <Card>
                             <CardHeader>
-                                <CardTitle tag="h5">Sentimiento mensual</CardTitle>
+                                <CardTitle tag="h5">Cuenta mensual</CardTitle>
                             </CardHeader>
                             <CardBody>
 
+                                <ResponsiveContainer width="80%" height={400}>
+                                    <BarChart
+                                        data={data}
+                                        margin={{
+                                            top: 5,
+                                            right: 30,
+                                            left: 20,
+                                            bottom: 5,
+                                        }}
+                                    >
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="" />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Legend wrapperStyle={{
+                                            position: "relative"
+                                        }} />
+                                        <Bar dataKey="Count" fill="#8884d8" />
 
-                                <BarChart
-                                    width={500}
-                                    height={300}
-                                    data={data}
-                                    margin={{
-                                        top: 5,
-                                        right: 30,
-                                        left: 20,
-                                        bottom: 5,
-                                    }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Bar dataKey="Count" fill="#8884d8" />
-                                    
-                                </BarChart>
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </CardBody>
+                        </Card>
+
+
+                    </Col>
+                    <Col md="6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle tag="h5">Sentimiento</CardTitle>
+                            </CardHeader>
+                            <CardBody>
+
+                                <ResponsiveContainer width="95%" height={400}>
+                                    <RadialBarChart
+                                        innerRadius="10%"
+                                        outerRadius="80%"
+                                        data={datos_vector}
+                                        startAngle={180}
+                                        endAngle={0}
+
+                                    >
+                                        <RadialBar
+                                            minAngle={15}
+                                            label={{ fill: '#666', position: 'insideStart' }}
+                                            background clockWise={true}
+                                            dataKey='datos' />
+                                        <Legend
+                                            iconSize={10}
+                                            width={120}
+                                            height={140}
+                                            layout='vertical'
+                                            verticalAlign='right'
+                                            align="right" />
+                                        <Tooltip />
+                                    </RadialBarChart>
+                                </ResponsiveContainer>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col>
+                        <Card>
                         </Card>
                     </Col>
                 </Row>
